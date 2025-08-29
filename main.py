@@ -75,14 +75,35 @@ class ConversionEngine:
         return total_ome
     
     def _get_conversion_factor(self, drug: str, route: str, units: str) -> Optional[float]:
+        # Map input units to daily units for lookup in conversion table
+        target_unit = None
+        if units in ["mg", "mg/day"]:
+            target_unit = "mg/day"
+        elif units in ["mcg", "mcg/day"]:
+            target_unit = "mcg/day"
+        elif units == "mcg/hr":
+            target_unit = "mcg/hr"
+        elif units == "mg/hr":
+            target_unit = "mg/hr"
+        
+        if not target_unit:
+            print(f"⚠️  Unknown unit type: {units}")
+            return None
+            
         for record in self.conversion_data["records"]:
             if (record["drug"] == drug and 
                 record["route"] == route and 
-                record["dose_unit"] == units):
+                record["dose_unit"] == target_unit):
                 return record["to_ome"]
         return None
     
     def _calculate_daily_dose(self, med: OpioidMedication) -> float:
+        # For hourly rates (mcg/hr, mg/hr), don't multiply by frequency
+        if med.units in ["mcg/hr", "mg/hr"]:
+            print(f"    Hourly rate detected, using dose as-is: {med.dose} {med.units}")
+            return med.dose
+            
+        # For single doses (mg, mcg), multiply by frequency to get daily dose
         if med.frequency:
             freq_map = {
                 "once daily": 1, "daily": 1, "qd": 1,
@@ -95,8 +116,10 @@ class ConversionEngine:
             }
             multiplier = freq_map.get(med.frequency.lower(), 1)
             print(f"    Frequency '{med.frequency}' -> multiplier {multiplier}")
+            print(f"    Converting {med.dose} {med.units} to daily dose: {med.dose * multiplier}")
             return med.dose * multiplier
-        print(f"    No frequency specified, using dose as daily: {med.dose}")
+            
+        print(f"    No frequency specified, using dose as daily: {med.dose} {med.units}")
         return med.dose
     
     def convert_from_ome(self, ome_total: float, target_drug: str, target_route: str = "po") -> ConversionResult:
@@ -142,11 +165,12 @@ async def parse_natural_language(request: ParseRequest):
                     "content": """You are a medical assistant that parses opioid medication descriptions into structured data. 
                     Extract medications, routes, doses, units, and frequencies from natural language.
                     
-                    Valid routes: po, iv, im, sc, transdermal, buc_sublingual, rectal
-                    Valid units: mg/day, mcg/hr, mcg/day
-                    Valid frequencies: daily, twice daily, three times daily, four times daily, every 4 hours, every 6 hours, every 8 hours, every 12 hours, qd, bid, tid, qid, q4h, q6h, q8h, q12h, prn, as needed
+                    CRITICAL: Only parse what is explicitly stated. DO NOT perform any calculations or conversions.
                     
-                    IMPORTANT: Use only the exact frequency terms listed above. Do not include calculations or explanations in the frequency field.
+                    Example: "0.2mg hydromorphone every 6 hours" should parse as:
+                    - dose: 0.2 (not 0.8)
+                    - units: "mg" (not "mg/day")
+                    - frequency: "every 6 hours"
                     
                     Return JSON with medications array containing drug, route, dose, units, and frequency fields."""
                 },
@@ -178,7 +202,7 @@ async def parse_natural_language(request: ParseRequest):
                                         "dose": {"type": "number"},
                                         "units": {
                                             "type": "string",
-                                            "enum": ["mg/day", "mcg/hr", "mcg/day"]
+                                            "enum": ["mg", "mcg", "mg/hr", "mcg/hr"]
                                         },
                                         "frequency": {
                                             "type": "string",
@@ -211,9 +235,24 @@ async def parse_natural_language(request: ParseRequest):
         
         return ParseResponse(regimen=regimen)
         
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Failed to parse medication text. The AI model returned invalid JSON. Please try rephrasing your input.")
+    except openai.RateLimitError:
+        print("OpenAI rate limit exceeded")
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    except openai.AuthenticationError:
+        print("OpenAI authentication error")
+        raise HTTPException(status_code=500, detail="API authentication failed. Please contact support.")
     except Exception as e:
-        print(f"Parse error: {str(e)}")  # Server-side logging
-        raise HTTPException(status_code=500, detail=f"Error parsing text: {str(e)}")
+        print(f"Parse error: {str(e)}")
+        error_msg = str(e)
+        if "enum" in error_msg.lower():
+            raise HTTPException(status_code=400, detail="Unrecognized medication, route, units, or frequency. Please check your input and try again.")
+        elif "required" in error_msg.lower():
+            raise HTTPException(status_code=400, detail="Missing required medication information (drug, route, dose, or units). Please provide complete medication details.")
+        else:
+            raise HTTPException(status_code=500, detail=f"Unable to parse medication text: {error_msg}")
 
 @app.post("/convert", response_model=ConversionResult)
 async def convert_opioids(request: ConversionRequest):
@@ -233,8 +272,14 @@ async def convert_opioids(request: ConversionRequest):
         
         return result
     except Exception as e:
-        print(f"Convert error: {str(e)}")  # Server-side logging
-        raise HTTPException(status_code=500, detail=f"Error converting opioids: {str(e)}")
+        print(f"Convert error: {str(e)}")
+        error_msg = str(e)
+        if "conversion factor" in error_msg.lower():
+            raise HTTPException(status_code=400, detail="No conversion data available for one or more medications in your regimen. Please check drug names, routes, and units.")
+        elif "target" in error_msg.lower():
+            raise HTTPException(status_code=400, detail="Invalid target medication or route specified for conversion.")
+        else:
+            raise HTTPException(status_code=500, detail=f"Conversion failed: {error_msg}")
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
