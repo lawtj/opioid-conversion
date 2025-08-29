@@ -1,0 +1,49 @@
+{
+    "schema_version": "1.0",
+    "units": ["mg/day","mcg/hr"],
+    "routes": ["po","buc_sublingual","transdermal","iv","im","sc","rectal"],
+    "records": [
+      { "drug":"codeine",          "route":"po","dose_unit":"mg/day","to_ome":0.1 },
+      { "drug":"dextropropoxyphene","route":"po","dose_unit":"mg/day","to_ome":0.1 },
+      { "drug":"dihydrocodeine",   "route":"po","dose_unit":"mg/day","to_ome":0.1 },
+      { "drug":"hydrocodone",      "route":"po","dose_unit":"mg/day","to_ome":1.2 },
+      { "drug":"hydromorphone",    "route":"po","dose_unit":"mg/day","to_ome":5.0 },
+      { "drug":"hydromorphone",    "route":"iv","dose_unit":"mg/day","to_ome":17.5 },
+      { "drug":"levorphanol",      "route":"po","dose_unit":"mg/day","to_ome":13.8 },
+      { "drug":"meperidine",       "route":"po","dose_unit":"mg/day","to_ome":0.1 },
+      { "drug":"methadone",        "route":"po","dose_unit":"mg/day","to_ome":4.7 },
+      { "drug":"morphine",         "route":"po","dose_unit":"mg/day","to_ome":1.0 },
+      { "drug":"oxycodone",        "route":"po","dose_unit":"mg/day","to_ome":1.5 },
+      { "drug":"oxymorphone",      "route":"po","dose_unit":"mg/day","to_ome":3.0 },
+      { "drug":"pentazocine",      "route":"po","dose_unit":"mg/day","to_ome":0.6 },
+      { "drug":"tapentadol",       "route":"po","dose_unit":"mg/day","to_ome":0.4 },
+      { "drug":"tramadol",         "route":"po","dose_unit":"mg/day","to_ome":0.2 },
+  
+      { "drug":"buprenorphine",    "route":"buc_sublingual","dose_unit":"mg/day","to_ome":38.8 },
+      { "drug":"fentanyl",         "route":"buc_sublingual","dose_unit":"mcg/day","to_ome":0.1 },
+      { "drug":"sufentanil",       "route":"buc_sublingual","dose_unit":"mcg/day","to_ome":0.5 },
+  
+      { "drug":"buprenorphine",    "route":"transdermal","preparation":"patch","dose_unit":"mcg/hr","to_ome":2.2 },
+      { "drug":"fentanyl",         "route":"transdermal","preparation":"patch","dose_unit":"mcg/hr","to_ome":2.7 },
+  
+      { "drug":"codeine",          "route":"iv","dose_unit":"mg/day","to_ome":0.3 },
+      { "drug":"buprenorphine",    "route":"im","dose_unit":"mg/day","to_ome":75.0 },
+      { "drug":"butorphanol",      "route":"iv","dose_unit":"mg/day","to_ome":15.0 },
+      { "drug":"diamorphine",      "route":"iv","dose_unit":"mg/day","to_ome":3.3 },
+      { "drug":"hydromorphone",    "route":"sc","dose_unit":"mg/day","to_ome":17.5 },
+      { "drug":"fentanyl",         "route":"iv","dose_unit":"mg/day","to_ome":0.2 },
+      { "drug":"levorphanol",      "route":"iv","dose_unit":"mg/day","to_ome":20.0 },
+      { "drug":"meperidine",       "route":"iv","dose_unit":"mg/day","to_ome":0.4 },
+      { "drug":"morphine",         "route":"iv","dose_unit":"mg/day","to_ome":3.0 },
+      { "drug":"methadone",        "route":"iv","dose_unit":"mg/day","to_ome":13.5 },
+      { "drug":"oxycodone",        "route":"iv","dose_unit":"mg/day","to_ome":3.0 },
+      { "drug":"oxycodone",        "route":"sc","dose_unit":"mg/day","to_ome":3.0 },
+      { "drug":"oxymorphone",      "route":"iv","dose_unit":"mg/day","to_ome":30.0 },
+      { "drug":"pentazocine",      "route":"iv","dose_unit":"mg/day","to_ome":1.1 },
+      { "drug":"pethidine",        "route":"iv","dose_unit":"mg/day","to_ome":0.4 },
+      { "drug":"sufentanil",       "route":"iv","dose_unit":"mg/day","to_ome":2.0 },
+  
+      { "drug":"oxycodone",        "route":"rectal","dose_unit":"mg/day","to_ome":1.5 },
+      { "drug":"oxymorphone",      "route":"rectal","dose_unit":"mg/day","to_ome":3.5 }
+    ]
+  }
