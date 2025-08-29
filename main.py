@@ -135,7 +135,7 @@ async def parse_natural_language(request: ParseRequest):
         client = openai.OpenAI()
         
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-5-mini",
             messages=[
                 {
                     "role": "system",
@@ -167,11 +167,23 @@ async def parse_natural_language(request: ParseRequest):
                                 "items": {
                                     "type": "object",
                                     "properties": {
-                                        "drug": {"type": "string"},
-                                        "route": {"type": "string"},
+                                        "drug": {
+                                            "type": "string",
+                                            "enum": ["morphine", "oxycodone", "hydromorphone", "fentanyl", "methadone", "buprenorphine", "tramadol", "codeine", "hydrocodone", "oxymorphone", "levorphanol", "meperidine", "pentazocine", "tapentadol", "butorphanol", "diamorphine", "sufentanil", "pethidine", "dextropropoxyphene", "dihydrocodeine"]
+                                        },
+                                        "route": {
+                                            "type": "string",
+                                            "enum": ["po", "iv", "im", "sc", "transdermal", "buc_sublingual", "rectal"]
+                                        },
                                         "dose": {"type": "number"},
-                                        "units": {"type": "string"},
-                                        "frequency": {"type": "string"}
+                                        "units": {
+                                            "type": "string",
+                                            "enum": ["mg/day", "mcg/hr", "mcg/day"]
+                                        },
+                                        "frequency": {
+                                            "type": "string",
+                                            "enum": ["daily", "twice daily", "three times daily", "four times daily", "every 4 hours", "every 6 hours", "every 8 hours", "every 12 hours", "q4h", "q6h", "q8h", "q12h", "bid", "tid", "qid", "prn", "as needed"]
+                                        }
                                     },
                                     "required": ["drug", "route", "dose", "units"]
                                 }
