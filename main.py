@@ -155,9 +155,9 @@ async def parse_natural_language(request: ParseRequest):
         if not os.getenv("OPENAI_API_KEY"):
             raise HTTPException(status_code=500, detail="OpenAI API key not configured")
             
-        client = openai.OpenAI()
+        client = openai.AsyncOpenAI()
         
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model="gpt-5-mini",
             messages=[
                 {
